@@ -1,4 +1,4 @@
-# Underground Terminal B2B Luxury Marketplace
+# Underground Terminal - B2B Luxury Marketplace
 
 A specialized B2B ecommerce platform for the luxury fashion and cosmetics sector, addressing market inefficiencies through secure transactions, real-time logistics, and comprehensive inventory management.
 
@@ -12,17 +12,18 @@ Underground Terminal is a modern B2B marketplace designed specifically for luxur
 - **👥 Role-Based Access**: Supplier, Buyer, Designer user types
 - **💎 Luxury Product Catalog**: High-end fashion and cosmetics
 - **📱 Mobile-First Design**: Flutter app with professional dark theme
-- **🛡️ Enterprise Security**: BCrypt encryption, CORS protection
+- **🛡️ Enterprise Security**: BCrypt encryption, JWT filter chain, CORS protection
 - **📊 Real-time Data**: MySQL database with comprehensive product management
 
 ## 🏗️ Architecture
 
 ### Backend (Spring Boot 3.2.0)
 - **Java 17** with Maven build system
-- **MySQL 8.0+** database with JPA/Hibernate
-- **Spring Security** with JWT authentication
+- **MySQL 8.0+** / H2 in-memory database with JPA/Hibernate
+- **Spring Security** with JWT authentication filter
 - **OAuth2** Google integration
 - **RESTful APIs** with OpenAPI documentation
+- **Spring Profiles**: dev (H2), staging (MySQL), prod (MySQL)
 
 ### Frontend (Flutter 3.6.0)
 - **Dart SDK 3.0+** mobile application
@@ -31,6 +32,24 @@ Underground Terminal is a modern B2B marketplace designed specifically for luxur
 - **Material Design 3** with custom luxury theme
 - **HTTP client** for API communication
 
+## 🌿 Branching Strategy
+
+```
+prod (production - auto-deployed to Render)
+  ↑
+staging (pre-production testing - auto-deployed to Render staging)
+  ↑
+dev (development - built & tested on CI)
+  ↑
+feature/* (individual features or fixes)
+```
+
+### Workflow
+1. **Feature branches** → Create from `dev`, merge back via PR
+2. **Dev branch** → Continuous integration (build + test)
+3. **Staging branch** → Pre-production deployment on Render
+4. **Prod branch** → Production deployment on Render
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -38,7 +57,7 @@ Underground Terminal is a modern B2B marketplace designed specifically for luxur
 #### Backend Requirements
 - Java 17 or higher
 - Maven 3.6+
-- MySQL 8.0+
+- MySQL 8.0+ (for staging/prod) or H2 (for dev, no install needed)
 - Git
 
 #### Frontend Requirements
@@ -55,20 +74,18 @@ Underground Terminal is a modern B2B marketplace designed specifically for luxur
    cd Underground_Terminal_Application
    ```
 
-2. **Setup MySQL Database**
-   ```sql
-   CREATE DATABASE underground_terminal;
-   CREATE USER 'underground_user'@'localhost' IDENTIFIED BY 'your_password';
-   GRANT ALL PRIVILEGES ON underground_terminal.* TO 'underground_user'@'localhost';
-   FLUSH PRIVILEGES;
+2. **Switch to dev branch**
+   ```bash
+   git checkout dev
    ```
 
-3. **Configure Backend**
+3. **Setup Backend (dev profile with H2 - no MySQL needed)**
    ```bash
    cd backend
-   # Update application.properties with your MySQL credentials
-   mvn clean install
+   mvn clean compile
    mvn spring-boot:run
+   # Or with explicit profile:
+   mvn spring-boot:run -Dspring-boot.run.profiles=dev
    ```
 
 4. **Setup Flutter App**
@@ -78,41 +95,40 @@ Underground Terminal is a modern B2B marketplace designed specifically for luxur
    flutter run
    ```
 
+5. **Access the API**
+   - API: `http://localhost:8080/api/products`
+   - Swagger UI: `http://localhost:8080/swagger-ui.html`
+   - H2 Console: `http://localhost:8080/h2-console`
+   - Seed data: 9 users + 20+ luxury products loaded automatically
+
 ### Configuration
 
-#### Backend Configuration (`backend/src/main/resources/application.properties`)
-
-```properties
-# MySQL Database
-spring.datasource.url=jdbc:mysql://localhost:3306/underground_terminal
-spring.datasource.username=underground_user
-spring.datasource.password=your_password
-
-# JWT Configuration
-jwt.secret=your_jwt_secret_key
-jwt.expiration=86400000
-
-# Google OAuth2
-spring.security.oauth2.client.registration.google.client-id=your_google_client_id
-spring.security.oauth2.client.registration.google.client-secret=your_google_client_secret
+#### Environment Variables
+Copy `.env.example` to `.env` and update values:
+```bash
+cp .env.example .env
 ```
 
-#### Frontend Configuration (`mobile/lib/services/auth_service.dart`)
+#### Spring Profiles
+```bash
+# Development (H2 in-memory - default)
+mvn spring-boot:run
 
-```dart
-final GoogleSignIn _googleSignIn = GoogleSignIn(
-  clientId: 'your_google_client_id',
-);
+# Staging (MySQL)
+SPRING_PROFILES_ACTIVE=staging mvn spring-boot:run
+
+# Production (MySQL)
+SPRING_PROFILES_ACTIVE=prod mvn spring-boot:run
 ```
 
 ## 📱 Application Features
 
 ### Authentication System
-- **Email/Password Registration & Login**
+- **Email/Password Registration & Login** with JWT
 - **Google OAuth2 Single Sign-On**
-- **JWT Token Management**
-- **Role-based Access Control**
-- **Secure Session Handling**
+- **JWT Token Management** with automatic validation
+- **Role-based Access Control** (SUPPLIER, BUYER, DESIGNER)
+- **Secure Session Handling** with stateless authentication
 
 ### User Roles
 
@@ -139,6 +155,7 @@ final GoogleSignIn _googleSignIn = GoogleSignIn(
 - **Premium Cosmetics**: Skincare, fragrances, beauty products
 - **Real-time Inventory**: Stock level tracking and alerts
 - **Image Management**: Unsplash-sourced luxury product images
+- **Search & Filter**: By name, supplier, price range
 
 ## 🔧 Development
 
@@ -152,8 +169,8 @@ mvn test
 
 #### Building for Production
 ```bash
-mvn clean package
-java -jar target/underground-terminal-api-0.0.1-SNAPSHOT.jar
+mvn clean package -DskipTests
+java -jar target/underground-terminal-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
 #### API Documentation
@@ -162,11 +179,44 @@ java -jar target/underground-terminal-api-0.0.1-SNAPSHOT.jar
 
 ### Frontend Development
 
-#### Running the App
+#### Running on Mobile (Android/iOS)
 ```bash
 cd mobile
 flutter run
 ```
+
+#### Running on Web (Edge / Chrome)
+
+For local development, the frontend needs the API base URL set to `localhost` (not the Android emulator's `10.0.2.2`).
+
+**Option 1 — Run directly in the browser (hot-reload enabled):**
+```bash
+# Terminal 1 — Start Backend
+cd backend
+mvn spring-boot:run
+
+# Terminal 2 — Run Flutter Web on Edge
+cd mobile
+flutter run -d edge --dart-define=API_BASE_URL=http://localhost:8080/api
+```
+
+**Option 2 — Build and serve with Python (shareable build):**
+```bash
+# Terminal 1 — Start Backend
+cd backend
+mvn spring-boot:run
+
+# Terminal 2 — Build Flutter Web
+cd mobile
+flutter build web --dart-define=API_BASE_URL=http://localhost:8080/api
+
+# Terminal 3 — Serve with Python
+cd mobile/build/web
+python -m http.server 3000
+# Then open http://localhost:3000 in your browser
+```
+
+> **Note:** Use `--dart-define=API_BASE_URL=https://your-domain.com/api` for production or Render deployment.
 
 #### Building for Production
 ```bash
@@ -175,12 +225,52 @@ flutter build apk --release
 
 # iOS
 flutter build ios --release
+
+# Web
+flutter build web --dart-define=API_BASE_URL=https://your-api-url.com/api
 ```
 
 #### Testing
 ```bash
 flutter test
 ```
+
+## 🚀 Deployment (Render)
+
+The project is configured for **Render** deployment with CI/CD via GitHub Actions.
+
+### One-click Deploy
+
+1. Fork/push this repo to GitHub
+2. Create a Render account at [render.com](https://render.com)
+3. Connect your GitHub repo to Render
+4. Render will auto-detect `render.yaml` for infrastructure
+
+### Manual Render Setup
+
+1. **Create a PostgreSQL database** on Render → the `render.yaml` handles this
+2. **Deploy the API service** using Docker
+3. **Set environment variables** via Render dashboard:
+   - `SPRING_PROFILES_ACTIVE=prod`
+   - `JWT_SECRET` (generate a strong one)
+   - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
+   - `CORS_ORIGINS`
+
+### CI/CD Pipeline
+
+The GitHub Actions workflow (`.github/workflows/ci-cd.yml`):
+1. **On push to any branch** → Build & test backend & frontend
+2. **On push to staging** → Build Docker image + Deploy to Render staging
+3. **On push to prod** → Build Docker image + Deploy to Render production
+
+### Required GitHub Secrets
+
+| Secret | Description |
+|--------|-------------|
+| `DOCKER_USERNAME` | Docker Hub username |
+| `DOCKER_PASSWORD` | Docker Hub password/token |
+| `RENDER_API_KEY` | Render API key |
+| `RENDER_SERVICE_ID` | Render service ID |
 
 ## 📚 API Documentation
 
@@ -235,7 +325,7 @@ Authorization: Bearer <jwt_token>
 ### Product Endpoints
 
 #### GET `/api/products`
-Retrieve all luxury products.
+Retrieve all luxury products (public).
 
 #### GET `/api/products/{id}`
 Get specific product details.
@@ -246,7 +336,7 @@ Create new product (Suppliers only).
 ### User Endpoints
 
 #### GET `/api/users`
-List all users (Admin only).
+List all users (requires JWT auth).
 
 #### GET `/api/users/{id}`
 Get user profile.
@@ -303,44 +393,11 @@ CREATE TABLE products (
 );
 ```
 
-## 🚀 Deployment
-
-### Backend Deployment
-
-#### Docker
-```dockerfile
-FROM openjdk:17-jdk-slim
-COPY target/underground-terminal-api-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app.jar"]
-```
-
-#### Environment Variables
-```bash
-SPRING_DATASOURCE_URL=jdbc:mysql://production-db:3306/underground_terminal
-SPRING_DATASOURCE_USERNAME=prod_user
-SPRING_DATASOURCE_PASSWORD=secure_password
-JWT_SECRET=production_jwt_secret_key_here
-GOOGLE_CLIENT_ID=production_google_client_id
-GOOGLE_CLIENT_SECRET=production_google_client_secret
-```
-
-### Frontend Deployment
-
-#### Android Release
-```bash
-flutter build apk --release --target-platform android-arm64
-```
-
-#### iOS Release
-```bash
-flutter build ios --release
-```
-
-## 🔒 Security Considerations
+## 🔒 Security
 
 ### Authentication Security
 - **JWT tokens** with configurable expiration
+- **JWT authentication filter** validates every protected request
 - **BCrypt password hashing** with salt rounds
 - **OAuth2 integration** with Google
 - **CORS protection** for API endpoints
@@ -351,76 +408,18 @@ flutter build ios --release
 - **XSS protection** in frontend
 - **Secure token storage** in mobile app
 
-### API Security
-- **Rate limiting** (planned)
-- **Request size limits** configured
-- **HTTPS enforcement** in production
-- **Audit logging** capabilities
-
-## 🧪 Testing
-
-### Backend Testing
-```bash
-# Unit tests
-mvn test
-
-# Integration tests
-mvn verify
-
-# Test coverage
-mvn jacoco:report
-```
-
-### Frontend Testing
-```bash
-# Unit tests
-flutter test
-
-# Widget tests
-flutter test --coverage
-
-# Integration tests
-flutter driver test_driver/app.dart
-```
-
-## 📈 Performance
-
-### Backend Optimization
-- **Database indexing** on frequently queried fields
-- **Connection pooling** for MySQL
-- **JPA lazy loading** for relationships
-- **Caching strategy** (planned)
-
-### Frontend Optimization
-- **Image optimization** with network caching
-- **State management** with Provider
-- **Lazy loading** for product lists
-- **Offline capability** (planned)
-
 ## 🤝 Contributing
 
 1. **Fork the repository**
-2. **Create feature branch** (`git checkout -b feature/amazing-feature`)
+2. **Create feature branch** from `dev` (`git checkout -b feature/amazing-feature dev`)
 3. **Commit changes** (`git commit -m 'Add amazing feature'`)
 4. **Push to branch** (`git push origin feature/amazing-feature`)
-5. **Open Pull Request**
+5. **Open Pull Request** to `dev`
 
 ### Code Style
 - **Backend**: Follow Google Java Style Guide
 - **Frontend**: Follow Dart style guide with `flutter format`
 - **Git**: Use conventional commit messages
-
-## 📞 Support
-
-### Documentation
-- **API Docs**: Available at `/swagger-ui.html`
-- **Architecture**: See `PROJECT_CAPABILITIES.md`
-- **Setup Guide**: See `SETUP.md`
-
-### Contact
-- **Project Manager**: Underground Terminal Team
-- **Technical Lead**: Development Team
-- **Issues**: GitHub Issues page
 
 ## 📄 License
 
