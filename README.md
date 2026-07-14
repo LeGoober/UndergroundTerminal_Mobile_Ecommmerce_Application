@@ -15,6 +15,19 @@ Underground Terminal is a modern B2B marketplace designed specifically for luxur
 - **🛡️ Enterprise Security**: BCrypt encryption, JWT filter chain, CORS protection
 - **📊 Real-time Data**: MySQL database with comprehensive product management
 
+### What's new in v0.2
+
+- **🛒 Real Orders**: checkout places orders that validate and decrement stock atomically
+- **🚚 Logistics**: every order opens a consignment (`LOT-xxxx`) with a status timeline
+  (PREPARING → IN_TRANSIT → CUSTOMS → DELIVERED) suppliers advance and buyers track
+- **💬 Messaging**: client/business chat — live over WebSocket (`/ws/chat`, JWT-authenticated)
+  with REST history and polling fallback
+- **📈 Analytics**: `/api/analytics/summary` powers the in-app Insights dashboard
+  (revenue, orders, stock position, 7-day trend)
+- **📟 Terminal tab** in the mobile app: Logistics / Messages / Insights operations hub
+- **🌐 Marketing mock**: white-label stakeholder site in `marketing/`, deployed as a
+  Render static site from the `marketing` branch
+
 ## 🏗️ Architecture
 
 ### Backend (Spring Boot 3.2.0)
