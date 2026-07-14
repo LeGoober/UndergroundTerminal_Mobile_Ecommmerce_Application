@@ -103,7 +103,11 @@
   .btn-solid:hover { background: var(--champagne); border-color: var(--champagne); }
   .btn-ghost { color: var(--champagne); background: transparent; }
   .btn-ghost:hover { border-color: var(--champagne); }
-  @media (max-width: 760px) { nav.main a { display: none; } }
+  @media (max-width: 760px) {
+    nav.main a { display: none; }
+    nav.main a.btn { display: inline-block; padding: 11px 16px; }
+    .wordmark { letter-spacing: .18em; font-size: 12.5px; }
+  }
 
   /* ── Hero ───────────────────────────────────────────────────── */
   .hero { padding: 88px 0 72px; border-bottom: 1px solid var(--line); }
@@ -552,19 +556,32 @@
   }
   function hideTip() { tip.style.opacity = '0'; tip.setAttribute('aria-hidden', 'true'); }
 
-  /* ── Bar chart: stock by category (single series, brand gold) ── */
-  (function stockChart() {
+  /* ── Bar chart: stock by category (single series, brand gold) ──
+     Rendered at the container's real pixel width so text stays 1:1
+     readable on any screen; narrow screens stack the label above
+     the bar instead of beside it. */
+  function renderStockChart() {
     var svg = document.getElementById('chart-stock');
-    var W = 640, H = 300, padL = 150, padR = 56, rowH = H / DEMO_DATA.stock.length;
+    var W = Math.max(260, Math.round(svg.parentNode.getBoundingClientRect().width - 44));
+    var narrow = W < 480;
+    var rowH = narrow ? 54 : 50;
+    var H = DEMO_DATA.stock.length * rowH;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.innerHTML = '';
+    var padL = narrow ? 0 : 150, padR = narrow ? 44 : 56;
     var max = Math.max.apply(null, DEMO_DATA.stock.map(function (d) { return d.units; }));
     var scale = (W - padL - padR) / max;
 
     DEMO_DATA.stock.forEach(function (d, i) {
-      var y = i * rowH + rowH / 2;
       var barW = d.units * scale, barH = 14;
-      el('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: LINE, 'stroke-width': 1 }, svg);
-      el('text', { x: padL - 12, y: y + 4, 'text-anchor': 'end', 'font-size': 12, fill: MUTED }, svg)
-        .textContent = d.cat;
+      var y = narrow ? i * rowH + 38 : i * rowH + rowH / 2;   /* bar centerline */
+      if (narrow) {
+        el('text', { x: 0, y: i * rowH + 16, 'font-size': 12, fill: MUTED }, svg).textContent = d.cat;
+      } else {
+        el('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: LINE, 'stroke-width': 1 }, svg);
+        el('text', { x: padL - 12, y: y + 4, 'text-anchor': 'end', 'font-size': 12, fill: MUTED }, svg)
+          .textContent = d.cat;
+      }
       var bar = el('rect', {
         x: padL, y: y - barH / 2, width: barW, height: barH,
         rx: 0, fill: GOLD, 'fill-opacity': .92
@@ -589,12 +606,15 @@
     t.innerHTML = '<thead><tr><th scope="col">Category</th><th scope="col">Units</th></tr></thead><tbody>' +
       DEMO_DATA.stock.map(function (d) { return '<tr><td>' + d.cat + '</td><td>' + d.units + '</td></tr>'; }).join('') +
       '</tbody>';
-  })();
+  }
 
   /* ── Line chart: orders per day (single series, brand gold) ──── */
-  (function ordersChart() {
+  function renderOrdersChart() {
     var svg = document.getElementById('chart-orders');
-    var W = 460, H = 170, padL = 34, padR = 16, padT = 14, padB = 26;
+    var W = Math.max(260, Math.round(svg.parentNode.getBoundingClientRect().width - 44));
+    var H = 170, padL = 34, padR = 16, padT = 14, padB = 26;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.innerHTML = '';
     var data = DEMO_DATA.orders;
     var max = Math.max.apply(null, data.map(function (d) { return d.n; }));
     var stepX = (W - padL - padR) / (data.length - 1);
@@ -632,7 +652,15 @@
     t.innerHTML = '<thead><tr><th scope="col">Day</th><th scope="col">Orders</th></tr></thead><tbody>' +
       data.map(function (d) { return '<tr><td>' + d.day + '</td><td>' + d.n + '</td></tr>'; }).join('') +
       '</tbody>';
-  })();
+  }
+
+  renderStockChart();
+  renderOrdersChart();
+  var resizeT;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeT);
+    resizeT = setTimeout(function () { renderStockChart(); renderOrdersChart(); }, 180);
+  });
 
   /* ── Consignment queue ───────────────────────────────────────── */
   document.getElementById('queue').innerHTML = DEMO_DATA.queue.map(function (q) {
