@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Underground Terminal — B2B Luxury Trade Platform</title>
+<meta name="description" content="Underground Terminal connects verified suppliers, buyers and designers in luxury fashion and cosmetics — secure transactions, live logistics and inventory in one platform.">
+<!--
+  ═══════════════════════════════════════════════════════════════
+  WHITE-LABEL GUIDE
+  This page is a brandable marketing mock. To reskin it for a
+  different client (e.g. a clothing brand or service platform):
+
+  1. BRAND TOKENS — edit the :root block below (colors + fonts).
+  2. WORDMARK    — search for "data-brand" and replace the text.
+  3. COPY        — all section copy lives in plain HTML, top to
+                   bottom; the manifest/dashboard demo data lives
+                   in the single DEMO_DATA object in the script.
+  4. FONTS       — swap the Google Fonts <link> href families.
+
+  Nothing else is brand-specific. All demo figures are
+  illustrative and labeled as such in the UI.
+  ═══════════════════════════════════════════════════════════════
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── BRAND TOKENS (white-label surface) ─────────────────────── */
+  :root {
+    --bg:          #0D0B08;   /* page ground — warm near-black   */
+    --surface:     #15120C;   /* cards, board                    */
+    --surface-2:   #1C1810;   /* raised elements                 */
+    --line:        rgba(212, 175, 55, .14);
+    --gold:        #D4AF37;   /* primary metal — charts, rules   */
+    --gold-hi:     #FFD700;   /* app-brand accent — CTAs, keys   */
+    --champagne:   #F0E6C8;   /* display headings                */
+    --ink:         #F5F0E3;   /* primary text                    */
+    --muted:       #A89F8A;   /* secondary text                  */
+    --status-good: #58B87E;
+    --status-info: #5B9BD5;
+    --status-warn: #E2953F;
+    --status-bad:  #E06C5F;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body:    'Montserrat', -apple-system, 'Segoe UI', sans-serif;
+    --font-mono:    'IBM Plex Mono', Consolas, monospace;
+    --measure: 62ch;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; border-radius: 2px; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* ── Top bar ────────────────────────────────────────────────── */
+  header.top {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .wordmark {
+    font-family: var(--font-mono); font-size: 14px; font-weight: 500;
+    letter-spacing: .28em; text-transform: uppercase; text-decoration: none;
+  }
+  .wordmark b { color: var(--gold-hi); font-weight: 500; }
+  nav.main { display: flex; gap: 28px; align-items: center; }
+  nav.main a { font-size: 13px; font-weight: 500; letter-spacing: .04em; text-decoration: none; color: var(--muted); }
+  nav.main a:hover { color: var(--ink); }
+  .btn {
+    display: inline-block; font-family: var(--font-body); font-size: 13px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
+    padding: 12px 22px; border-radius: 2px; cursor: pointer; border: 1px solid var(--gold);
+    white-space: nowrap;
+  }
+  nav.main .btn { padding: 9px 16px; font-size: 12px; }
+  .btn-solid { background: var(--gold-hi); color: #171308; border-color: var(--gold-hi); }
+  .btn-solid:hover { background: var(--champagne); border-color: var(--champagne); }
+  .btn-ghost { color: var(--champagne); background: transparent; }
+  .btn-ghost:hover { border-color: var(--champagne); }
+  @media (max-width: 760px) { nav.main a { display: none; } }
+
+  /* ── Hero ───────────────────────────────────────────────────── */
+  .hero { padding: 88px 0 72px; border-bottom: 1px solid var(--line); }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 56px; align-items: center; }
+  @media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; } }
+  h1 {
+    font-family: var(--font-display); font-weight: 500; color: var(--champagne);
+    font-size: clamp(2.4rem, 5vw, 3.9rem); line-height: 1.08; letter-spacing: -.01em;
+    margin: 18px 0 22px;
+  }
+  h1 em { font-style: italic; color: var(--gold-hi); }
+  .hero p.lede { color: var(--muted); max-width: var(--measure); font-size: 17px; margin-bottom: 32px; }
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* ── The Manifest (signature) ───────────────────────────────── */
+  .board {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,.8);
+  }
+  .board-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; border-bottom: 1px solid var(--line); background: var(--surface-2);
+  }
+  .board-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+  .board-live { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--status-good); animation: pulse 2.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+  table.manifest { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12.5px; }
+  table.manifest th {
+    text-align: left; font-weight: 400; font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--muted); padding: 10px 18px 8px; border-bottom: 1px solid var(--line);
+  }
+  table.manifest td { padding: 12px 18px; border-bottom: 1px solid rgba(212,175,55,.07); color: var(--ink); white-space: nowrap; }
+  table.manifest tr:last-child td { border-bottom: none; }
+  table.manifest td.lot { color: var(--gold); }
+  table.manifest td.cargo { color: var(--muted); font-style: normal; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+  .status { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; letter-spacing: .08em; }
+  .status .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .st-transit  .dot { background: var(--status-info); }  .st-transit  { color: var(--status-info); }
+  .st-customs  .dot { background: var(--status-warn); }  .st-customs  { color: var(--status-warn); }
+  .st-cleared  .dot { background: var(--status-good); }  .st-cleared  { color: var(--status-good); }
+  .st-delayed  .dot { background: var(--status-bad); }   .st-delayed  { color: var(--status-bad); }
+  tr.tick td { animation: rowin .5s ease; }
+  @keyframes rowin { from { background: rgba(212,175,55,.10); } to { background: transparent; } }
+  .board-foot { padding: 10px 18px; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); border-top: 1px solid var(--line); }
+  @media (max-width: 640px) {
+    table.manifest .hide-sm { display: none; }
+    table.manifest td, table.manifest th { padding-left: 12px; padding-right: 12px; }
+  }
+
+  /* ── Stat band ──────────────────────────────────────────────── */
+  .stats { border-bottom: 1px solid var(--line); }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 760px) { .stats-grid { grid-template-columns: 1fr; } }
+  .stat { padding: 40px 32px; border-left: 1px solid var(--line); }
+  .stat:first-child { border-left: none; padding-left: 0; }
+  @media (max-width: 760px) { .stat { border-left: none; padding: 24px 0; border-top: 1px solid var(--line); } .stat:first-child { border-top: none; } }
+  .stat .num { font-family: var(--font-display); font-size: 2.6rem; color: var(--champagne); line-height: 1.1; }
+  .stat .num b { color: var(--gold-hi); font-weight: 500; }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* ── Sections ───────────────────────────────────────────────── */
+  section { padding: 88px 0; border-bottom: 1px solid var(--line); }
+  h2 {
+    font-family: var(--font-display); font-weight: 500; color: var(--champagne);
+    font-size: clamp(1.8rem, 3.4vw, 2.6rem); line-height: 1.15; margin: 14px 0 16px; max-width: 24ch;
+  }
+  .section-lede { color: var(--muted); max-width: var(--measure); margin-bottom: 48px; }
+
+  /* Roles */
+  .roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 860px) { .roles { grid-template-columns: 1fr; } }
+  .role {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 4px;
+    padding: 30px 26px; transition: border-color .25s ease, transform .25s ease;
+  }
+  .role:hover { border-color: rgba(212,175,55,.4); transform: translateY(-3px); }
+  .role .tag { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+  .role h3 { font-family: var(--font-display); font-weight: 500; color: var(--champagne); font-size: 1.45rem; margin: 12px 0 10px; }
+  .role p { font-size: 14px; color: var(--muted); }
+  .role ul { list-style: none; margin-top: 16px; }
+  .role li { font-size: 13px; color: var(--ink); padding: 7px 0 7px 20px; position: relative; border-top: 1px solid rgba(212,175,55,.08); }
+  .role li::before { content: "—"; position: absolute; left: 0; color: var(--gold); }
+
+  /* How it works */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+  .step { padding: 30px 26px 34px; background: var(--surface); border-left: 1px solid var(--line); position: relative; }
+  .step:first-child { border-left: none; }
+  @media (max-width: 860px) { .step { border-left: none; border-top: 1px solid var(--line); } .step:first-child { border-top: none; } }
+  .step .k { font-family: var(--font-mono); font-size: 11px; color: var(--gold); letter-spacing: .18em; }
+  .step h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.3rem; color: var(--champagne); margin: 10px 0 8px; }
+  .step p { font-size: 13.5px; color: var(--muted); }
+
+  /* ── Command view (dashboard demo) ──────────────────────────── */
+  .dash { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; }
+  @media (max-width: 960px) { .dash { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 22px 22px 18px; min-width: 0; }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; gap: 12px; }
+  .panel h3 { font-size: 13px; font-weight: 600; letter-spacing: .05em; color: var(--ink); }
+  .panel .sub { font-size: 11.5px; color: var(--muted); }
+  .panel svg { display: block; width: 100%; height: auto; }
+  .panel svg text { font-family: var(--font-mono); }
+
+  .chart-tip {
+    position: fixed; z-index: 90; pointer-events: none; opacity: 0;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px;
+    padding: 8px 12px; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink);
+    transition: opacity .12s ease; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  }
+  .chart-tip b { color: var(--gold-hi); font-weight: 500; }
+
+  .queue { list-style: none; }
+  .queue li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 0; border-top: 1px solid rgba(212,175,55,.08); font-size: 13px; }
+  .queue li:first-child { border-top: none; }
+  .queue .q-name { color: var(--ink); }
+  .queue .q-meta { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+  details.tableview { margin-top: 14px; }
+  details.tableview summary { cursor: pointer; font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+  details.tableview summary:hover { color: var(--ink); }
+  details.tableview table { width: 100%; margin-top: 10px; border-collapse: collapse; font-size: 12.5px; font-family: var(--font-mono); }
+  details.tableview th, details.tableview td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid rgba(212,175,55,.08); color: var(--muted); font-weight: 400; }
+  details.tableview td:last-child, details.tableview th:last-child { text-align: right; }
+  details.tableview td { color: var(--ink); }
+
+  .demo-note { margin-top: 20px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+  /* ── Closing CTA + footer ───────────────────────────────────── */
+  .close { text-align: center; }
+  .close h2 { margin-left: auto; margin-right: auto; }
+  .close .section-lede { margin-left: auto; margin-right: auto; margin-bottom: 34px; }
+  footer { padding: 36px 0 48px; }
+  .foot-inner { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--ink); }
+
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <a class="wordmark" href="#" data-brand>UNDERGROUND<b>&nbsp;TERMINAL</b></a>
+    <nav class="main" aria-label="Primary">
+      <a href="#platform">The platform</a>
+      <a href="#how">How it works</a>
+      <a href="#command">Command view</a>
+      <a class="btn btn-solid" href="mailto:rorisangmakganaiv@gmail.com?subject=Underground%20Terminal%20—%20Access%20request">Request access</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── HERO ─────────────────────────────────────────────────────── -->
+<section class="hero" aria-label="Introduction">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">B2B trade infrastructure · Luxury fashion &amp; cosmetics</p>
+      <h1>Where luxury supply <em>clears.</em></h1>
+      <p class="lede">
+        Underground Terminal connects verified suppliers, buyers and designers in the
+        luxury fashion and cosmetics trade — secure transactions, live logistics and
+        inventory control on one platform.
+      </p>
+      <div class="hero-ctas">
+        <a class="btn btn-solid" href="mailto:rorisangmakganaiv@gmail.com?subject=Underground%20Terminal%20—%20Access%20request">Request access</a>
+        <a class="btn btn-ghost" href="#command">See the command view</a>
+      </div>
+    </div>
+
+    <!-- Signature: the live consignment manifest -->
+    <div class="board" role="region" aria-label="Live consignment manifest (demonstration data)">
+      <div class="board-head">
+        <span class="board-title">Consignment manifest</span>
+        <span class="board-live"><span class="pulse" aria-hidden="true"></span> LIVE FEED</span>
+      </div>
+      <table class="manifest">
+        <thead>
+          <tr>
+            <th scope="col">Lot</th>
+            <th scope="col">Route</th>
+            <th scope="col" class="hide-sm">Cargo</th>
+            <th scope="col" class="hide-sm">ETA</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody id="manifest-body"><!-- rows rendered by script --></tbody>
+      </table>
+      <div class="board-foot">Demonstration feed · consignment data is illustrative</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STAT BAND ────────────────────────────────────────────────── -->
+<div class="stats" aria-label="Platform figures (illustrative)">
+  <div class="wrap stats-grid">
+    <div class="stat reveal"><div class="num">R<b>2.4</b>M</div><div class="lbl">consignment value tracked in the pilot — illustrative</div></div>
+    <div class="stat reveal"><div class="num"><b>3</b> roles</div><div class="lbl">suppliers, buyers and designers, each with scoped access</div></div>
+    <div class="stat reveal"><div class="num"><b>1</b> ledger</div><div class="lbl">every order, movement and stock change in one audited record</div></div>
+  </div>
+</div>
+
+<!-- ── PLATFORM / ROLES ─────────────────────────────────────────── -->
+<section id="platform">
+  <div class="wrap">
+    <p class="eyebrow">The platform</p>
+    <h2>Built for the three sides of the luxury trade.</h2>
+    <p class="section-lede">
+      High-value goods move on trust. Underground Terminal verifies every account,
+      signs every session, and gives each side of a transaction exactly the controls
+      it needs — nothing shared that shouldn't be.
+    </p>
+    <div class="roles">
+      <article class="role reveal">
+        <span class="tag">Supplier</span>
+        <h3>List once, sell verified.</h3>
+        <p>Publish a catalogue of finished goods and raw materials with live stock levels attached to every listing.</p>
+        <ul>
+          <li>Product catalogue with imagery and pricing</li>
+          <li>Stock levels updated on every order</li>
+          <li>Verified storefront under your own name</li>
+        </ul>
+      </article>
+      <article class="role reveal">
+        <span class="tag">Buyer</span>
+        <h3>Source without the back-channel.</h3>
+        <p>Browse verified suppliers, compare stock in real time, and transact inside a secured session — not over DMs and deposits.</p>
+        <ul>
+          <li>Search and filter the full catalogue</li>
+          <li>Secure sign-in — email or Google</li>
+          <li>Order history in one place</li>
+        </ul>
+      </article>
+      <article class="role reveal">
+        <span class="tag">Designer</span>
+        <h3>Materials, tracked to the metre.</h3>
+        <p>Follow the materials your collections depend on — what's in stock, what's in transit, and when it lands.</p>
+        <ul>
+          <li>Watch listings for materials you use</li>
+          <li>Consignment tracking on incoming stock</li>
+          <li>Direct line to verified suppliers</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ─────────────────────────────────────────────── -->
+<section id="how">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Four moves from listing to landed.</h2>
+    <p class="section-lede">The platform runs the same path every time — that's what makes it auditable.</p>
+    <div class="steps">
+      <div class="step reveal">
+        <span class="k">01 · LIST</span>
+        <h3>Catalogue</h3>
+        <p>Suppliers publish goods with pricing, imagery and opening stock. Every listing belongs to a verified account.</p>
+      </div>
+      <div class="step reveal">
+        <span class="k">02 · VERIFY</span>
+        <h3>Clearance</h3>
+        <p>Buyers sign in with email or Google. Sessions are token-signed end to end — no anonymous trade.</p>
+      </div>
+      <div class="step reveal">
+        <span class="k">03 · TRANSACT</span>
+        <h3>Settlement</h3>
+        <p>Orders execute inside the platform. Stock decrements at the moment of sale, on both sides of the deal.</p>
+      </div>
+      <div class="step reveal">
+        <span class="k">04 · TRACK</span>
+        <h3>Manifest</h3>
+        <p>Consignments appear on the live manifest until delivery is confirmed — buyer and supplier watch the same board.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMMAND VIEW (dashboard demo) ────────────────────────────── -->
+<section id="command">
+  <div class="wrap">
+    <p class="eyebrow">Command view</p>
+    <h2>The whole operation on one screen.</h2>
+    <p class="section-lede">
+      A working preview of the operations dashboard: inventory position by category,
+      order flow across the week, and the consignment queue — the same data the
+      platform records on every trade.
+    </p>
+
+    <div class="dash">
+      <div class="panel reveal">
+        <div class="panel-head">
+          <h3>Stock on hand by category</h3>
+          <span class="sub">units · demo data</span>
+        </div>
+        <svg id="chart-stock" viewBox="0 0 640 300" role="img" aria-label="Bar chart of stock on hand by category. A data table follows."></svg>
+        <details class="tableview">
+          <summary>View as table</summary>
+          <table id="stock-table" aria-label="Stock on hand by category, table view"></table>
+        </details>
+      </div>
+
+      <div style="display:grid; gap:20px; min-width:0; align-content:start;">
+        <div class="panel reveal">
+          <div class="panel-head">
+            <h3>Orders this week</h3>
+            <span class="sub">demo data</span>
+          </div>
+          <svg id="chart-orders" viewBox="0 0 460 170" role="img" aria-label="Line chart of orders per day over the last seven days. A data table follows."></svg>
+          <details class="tableview">
+            <summary>View as table</summary>
+            <table id="orders-table" aria-label="Orders per day, table view"></table>
+          </details>
+        </div>
+
+        <div class="panel reveal">
+          <div class="panel-head">
+            <h3>Consignment queue</h3>
+            <span class="sub">demo data</span>
+          </div>
+          <ul class="queue" id="queue"></ul>
+        </div>
+      </div>
+    </div>
+
+    <p class="demo-note">All command-view figures are demonstration data prepared for stakeholder preview — not live trading records.</p>
+  </div>
+</section>
+
+<!-- ── CLOSING CTA ──────────────────────────────────────────────── -->
+<section class="close">
+  <div class="wrap">
+    <p class="eyebrow">Next departure</p>
+    <h2>See the platform with your own catalogue on it.</h2>
+    <p class="section-lede">
+      Underground Terminal is in its MVP phase and onboarding pilot partners in
+      luxury fashion and cosmetics. Request access and we'll walk you through a
+      live session on the platform.
+    </p>
+    <a class="btn btn-solid" href="mailto:rorisangmakganaiv@gmail.com?subject=Underground%20Terminal%20—%20Pilot%20partnership">Request a walkthrough</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span data-brand>UNDERGROUND TERMINAL · B2B luxury trade platform</span>
+    <span>MVP demonstration — figures illustrative · <a href="mailto:rorisangmakganaiv@gmail.com">Contact</a></span>
+  </div>
+</footer>
+
+<div class="chart-tip" id="tip" role="status" aria-hidden="true"></div>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var css = getComputedStyle(document.documentElement);
+  var GOLD = css.getPropertyValue('--gold').trim() || '#D4AF37';
+  var GOLD_HI = css.getPropertyValue('--gold-hi').trim() || '#FFD700';
+  var MUTED = css.getPropertyValue('--muted').trim() || '#A89F8A';
+  var LINE = 'rgba(212,175,55,.12)';
+
+  /* ── DEMO_DATA — the single place demo content lives ─────────── */
+  var DEMO_DATA = {
+    manifest: [
+      { lot: 'LOT-0492', route: 'CPT → PAR', cargo: 'Silk organza, 340m',        eta: '06:40', st: 'transit' },
+      { lot: 'LOT-0510', route: 'GVA → JNB', cargo: 'Vetiver absolute, 12kg',    eta: '09:15', st: 'customs' },
+      { lot: 'LOT-0477', route: 'MIL → CPT', cargo: 'Calfskin, full grain ×80',  eta: '11:05', st: 'transit' },
+      { lot: 'LOT-0463', route: 'JNB → LOS', cargo: 'Shea gold batch 7',         eta: '13:30', st: 'cleared' },
+      { lot: 'LOT-0521', route: 'PAR → NYC', cargo: 'Couture trims, assorted',   eta: '16:20', st: 'delayed' },
+      { lot: 'LOT-0498', route: 'CPT → DXB', cargo: 'Rooibos extract, 40L',      eta: '19:45', st: 'transit' }
+    ],
+    stock: [
+      { cat: 'Fine fragrance', units: 412 },
+      { cat: 'Skincare actives', units: 356 },
+      { cat: 'Silks & textiles', units: 298 },
+      { cat: 'Leather goods', units: 214 },
+      { cat: 'Couture trims', units: 167 },
+      { cat: 'Accessories', units: 121 }
+    ],
+    orders: [
+      { day: 'Mon', n: 14 }, { day: 'Tue', n: 19 }, { day: 'Wed', n: 16 },
+      { day: 'Thu', n: 27 }, { day: 'Fri', n: 31 }, { day: 'Sat', n: 22 }, { day: 'Sun', n: 25 }
+    ],
+    queue: [
+      { name: 'Maison Áurea — silk organza', meta: 'LOT-0492 · ETA 06:40' },
+      { name: 'Atelier Noor — vetiver absolute', meta: 'LOT-0510 · customs' },
+      { name: 'Conceria Piave — calfskin', meta: 'LOT-0477 · ETA 11:05' },
+      { name: 'Karité House — shea batch 7', meta: 'LOT-0463 · cleared' }
+    ]
+  };
+
+  var STATUS_LABEL = { transit: 'IN TRANSIT', customs: 'CUSTOMS', cleared: 'CLEARED', delayed: 'DELAYED' };
+  var SVG = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, parent) {
+    var n = document.createElementNS(SVG, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  /* ── Manifest board ──────────────────────────────────────────── */
+  var mBody = document.getElementById('manifest-body');
+  function renderManifest() {
+    mBody.innerHTML = '';
+    DEMO_DATA.manifest.slice(0, 6).forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="lot">' + r.lot + '</td>' +
+        '<td>' + r.route + '</td>' +
+        '<td class="cargo hide-sm">' + r.cargo + '</td>' +
+        '<td class="hide-sm">' + r.eta + '</td>' +
+        '<td><span class="status st-' + r.st + '"><span class="dot" aria-hidden="true"></span>' + STATUS_LABEL[r.st] + '</span></td>';
+      mBody.appendChild(tr);
+    });
+  }
+  renderManifest();
+
+  if (!reduced) {
+    var cycle = ['transit', 'customs', 'cleared'];
+    setInterval(function () {
+      var i = Math.floor(Math.random() * DEMO_DATA.manifest.length);
+      var row = DEMO_DATA.manifest[i];
+      if (row.st !== 'delayed') row.st = cycle[(cycle.indexOf(row.st) + 1) % cycle.length];
+      DEMO_DATA.manifest.unshift(DEMO_DATA.manifest.splice(i, 1)[0]);
+      renderManifest();
+      mBody.rows[0] && mBody.rows[0].classList.add('tick');
+    }, 3400);
+  }
+
+  /* ── Tooltip layer ───────────────────────────────────────────── */
+  var tip = document.getElementById('tip');
+  function showTip(html, x, y) {
+    tip.innerHTML = html;
+    tip.style.opacity = '1';
+    tip.setAttribute('aria-hidden', 'false');
+    var w = tip.offsetWidth;
+    tip.style.left = Math.min(Math.max(8, x - w / 2), window.innerWidth - w - 8) + 'px';
+    tip.style.top = (y - tip.offsetHeight - 12) + 'px';
+  }
+  function hideTip() { tip.style.opacity = '0'; tip.setAttribute('aria-hidden', 'true'); }
+
+  /* ── Bar chart: stock by category (single series, brand gold) ── */
+  (function stockChart() {
+    var svg = document.getElementById('chart-stock');
+    var W = 640, H = 300, padL = 150, padR = 56, rowH = H / DEMO_DATA.stock.length;
+    var max = Math.max.apply(null, DEMO_DATA.stock.map(function (d) { return d.units; }));
+    var scale = (W - padL - padR) / max;
+
+    DEMO_DATA.stock.forEach(function (d, i) {
+      var y = i * rowH + rowH / 2;
+      var barW = d.units * scale, barH = 14;
+      el('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: LINE, 'stroke-width': 1 }, svg);
+      el('text', { x: padL - 12, y: y + 4, 'text-anchor': 'end', 'font-size': 12, fill: MUTED }, svg)
+        .textContent = d.cat;
+      var bar = el('rect', {
+        x: padL, y: y - barH / 2, width: barW, height: barH,
+        rx: 0, fill: GOLD, 'fill-opacity': .92
+      }, svg);
+      el('path', {  /* 4px rounded data-end cap */
+        d: 'M' + (padL + barW - 4) + ' ' + (y - barH / 2) +
+           ' h0 a4 4 0 0 1 4 4 v' + (barH - 8) + ' a4 4 0 0 1 -4 4 z',
+        fill: GOLD
+      }, svg);
+      el('text', { x: padL + barW + 10, y: y + 4, 'font-size': 12, fill: GOLD_HI }, svg)
+        .textContent = d.units;
+
+      var hit = el('rect', { x: 0, y: i * rowH, width: W, height: rowH, fill: 'transparent' }, svg);
+      hit.addEventListener('mousemove', function (e) {
+        showTip('<b>' + d.cat + '</b><br>' + d.units + ' units on hand', e.clientX, e.clientY);
+        bar.setAttribute('fill-opacity', '1');
+      });
+      hit.addEventListener('mouseleave', function () { hideTip(); bar.setAttribute('fill-opacity', '.92'); });
+    });
+
+    var t = document.getElementById('stock-table');
+    t.innerHTML = '<thead><tr><th scope="col">Category</th><th scope="col">Units</th></tr></thead><tbody>' +
+      DEMO_DATA.stock.map(function (d) { return '<tr><td>' + d.cat + '</td><td>' + d.units + '</td></tr>'; }).join('') +
+      '</tbody>';
+  })();
+
+  /* ── Line chart: orders per day (single series, brand gold) ──── */
+  (function ordersChart() {
+    var svg = document.getElementById('chart-orders');
+    var W = 460, H = 170, padL = 34, padR = 16, padT = 14, padB = 26;
+    var data = DEMO_DATA.orders;
+    var max = Math.max.apply(null, data.map(function (d) { return d.n; }));
+    var stepX = (W - padL - padR) / (data.length - 1);
+    var yOf = function (n) { return padT + (H - padT - padB) * (1 - n / max); };
+    var xOf = function (i) { return padL + i * stepX; };
+
+    [0, .5, 1].forEach(function (f) {
+      var v = Math.round(max * f), y = yOf(v);
+      el('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: LINE, 'stroke-width': 1 }, svg);
+      el('text', { x: padL - 8, y: y + 4, 'text-anchor': 'end', 'font-size': 10, fill: MUTED }, svg).textContent = v;
+    });
+    data.forEach(function (d, i) {
+      el('text', { x: xOf(i), y: H - 8, 'text-anchor': 'middle', 'font-size': 10, fill: MUTED }, svg).textContent = d.day;
+    });
+
+    var pts = data.map(function (d, i) { return xOf(i) + ',' + yOf(d.n); }).join(' ');
+    el('polyline', { points: pts, fill: 'none', stroke: GOLD, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+
+    var cross = el('line', { x1: 0, x2: 0, y1: padT, y2: H - padB, stroke: MUTED, 'stroke-width': 1, 'stroke-dasharray': '3 3', opacity: 0 }, svg);
+    var dot = el('circle', { r: 4.5, fill: GOLD_HI, stroke: '#15120C', 'stroke-width': 2, opacity: 0 }, svg);
+    var hit = el('rect', { x: 0, y: 0, width: W, height: H, fill: 'transparent' }, svg);
+    hit.addEventListener('mousemove', function (e) {
+      var box = svg.getBoundingClientRect();
+      var i = Math.round(((e.clientX - box.left) * (W / box.width) - padL) / stepX);
+      i = Math.max(0, Math.min(data.length - 1, i));
+      cross.setAttribute('x1', xOf(i)); cross.setAttribute('x2', xOf(i)); cross.setAttribute('opacity', 1);
+      dot.setAttribute('cx', xOf(i)); dot.setAttribute('cy', yOf(data[i].n)); dot.setAttribute('opacity', 1);
+      showTip('<b>' + data[i].day + '</b><br>' + data[i].n + ' orders', e.clientX, e.clientY);
+    });
+    hit.addEventListener('mouseleave', function () {
+      cross.setAttribute('opacity', 0); dot.setAttribute('opacity', 0); hideTip();
+    });
+
+    var t = document.getElementById('orders-table');
+    t.innerHTML = '<thead><tr><th scope="col">Day</th><th scope="col">Orders</th></tr></thead><tbody>' +
+      data.map(function (d) { return '<tr><td>' + d.day + '</td><td>' + d.n + '</td></tr>'; }).join('') +
+      '</tbody>';
+  })();
+
+  /* ── Consignment queue ───────────────────────────────────────── */
+  document.getElementById('queue').innerHTML = DEMO_DATA.queue.map(function (q) {
+    return '<li><span class="q-name">' + q.name + '</span><span class="q-meta">' + q.meta + '</span></li>';
+  }).join('');
+
+  /* ── Scroll reveal ───────────────────────────────────────────── */
+  if (!reduced && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { threshold: .15 });
+    document.querySelectorAll('.reveal').forEach(function (n) { io.observe(n); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function (n) { n.classList.add('in'); });
+  }
+})();
+</script>
+</body>
+</html>
