@@ -1,0 +1,185 @@
+# ===============================================================
+# CI/CD Pipeline for Underground Terminal
+# ===============================================================
+# Branches:
+#   dev     -> Build & Test (push, PR)
+#   staging -> Build, Test & Deploy to Render staging
+#   prod    -> Build, Test & Deploy to Render production
+# ===============================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [dev, staging, prod]
+  pull_request:
+    branches: [dev, staging, prod]
+
+env:
+  JAVA_VERSION: '17'
+  MAVEN_OPTS: '-Xmx2g'
+
+jobs:
+  # ---- Backend Build & Test ----
+  backend-build:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build with Maven
+        run: mvn clean compile -B
+
+      - name: Run tests
+        run: mvn test -B
+
+      - name: Package JAR
+        run: mvn package -DskipTests -B
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 5
+
+  # ---- Frontend Build & Test ----
+  frontend-build:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mobile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze Dart code
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build APK (Android)
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-apk
+          path: mobile/build/app/outputs/flutter-apk/*.apk
+          retention-days: 5
+
+  # ---- Docker Build & Push (staging & prod only) ----
+  docker-build:
+    name: Docker Build & Push
+    needs: [backend-build]
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar
+          path: ./backend/target/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/underground-terminal-api
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ---- Deploy to Render ----
+  deploy-render:
+    name: Deploy to Render
+    needs: [backend-build, docker-build]
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
+          wait-for-success: true
+
+  # ---- Sentry Release (production only) ----
+  sentry-release:
+    name: Sentry Release
+    needs: [deploy-render]
+    if: github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: underground-terminal
+        with:
+          environment: production
+          version: ${{ github.sha }}

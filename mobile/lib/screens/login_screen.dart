@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
+import '../services/cart_service.dart';
 import '../models/user.dart';
 import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final CartService cartService;
+
+  const LoginScreen({super.key, required this.cartService});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -36,9 +39,8 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        User user;
         if (_isSignUp) {
-          user = await _authService.register(
+          await _authService.register(
             name: _nameController.text,
             email: _emailController.text,
             password: _passwordController.text,
@@ -46,13 +48,13 @@ class _LoginScreenState extends State<LoginScreen> {
             bio: 'User registered in Underground Terminal B2B marketplace',
           );
         } else {
-          user = await _authService.login(_emailController.text, _passwordController.text);
+          await _authService.login(_emailController.text, _passwordController.text);
         }
-        
+
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            MaterialPageRoute(builder: (context) => DashboardScreen(cartService: widget.cartService)),
           );
         }
       } catch (e) {
@@ -84,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null && mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          MaterialPageRoute(builder: (context) => DashboardScreen(cartService: widget.cartService)),
         );
       }
     } catch (e) {
@@ -119,8 +121,8 @@ class _LoginScreenState extends State<LoginScreen> {
               key: _formKey,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height - 
-                      MediaQuery.of(context).padding.top - 
+                  minHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
                       MediaQuery.of(context).padding.bottom - 48,
                 ),
                 child: Column(
@@ -193,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-                
+
                 // Name field (only for sign up)
                 if (_isSignUp) ...[
                   TextFormField(
@@ -211,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                
+
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
@@ -247,18 +249,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                
+
                 // Role selector (only for sign up)
                 if (_isSignUp) ...[
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<UserRole>(
+                  const SizedBox(height: 16),                    DropdownButtonFormField<UserRole>(
                     value: _selectedRole,
                     decoration: const InputDecoration(
                       labelText: 'Account Type',
                       prefixIcon: Icon(Icons.business_center_outlined),
                     ),
                     items: UserRole.values.map((role) {
-                      String displayName = role.name.split('').first.toUpperCase() + 
+                      String displayName = role.name.split('').first.toUpperCase() +
                                           role.name.substring(1).toLowerCase();
                       return DropdownMenuItem<UserRole>(
                         value: role,
@@ -280,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                 ],
-                
+
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _login,
@@ -292,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         )
                       : Text(_isSignUp ? 'Create Account' : 'Sign In'),
                 ),
-                
+
                 if (!_isSignUp) ...[
                   const SizedBox(height: 16),
                   TextButton(
@@ -302,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text('Forgot Password?'),
                   ),
                 ],
-                
+
                 const SizedBox(height: 32),
                 const Divider(),
                 const SizedBox(height: 16),

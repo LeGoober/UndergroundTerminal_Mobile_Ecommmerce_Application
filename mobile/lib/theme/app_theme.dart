@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   static const Color primary = Color(0xFFFFD700); // Gold
@@ -58,13 +57,13 @@ class AppTheme {
           fontFamily: 'sans-serif',
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.cardBackground,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         elevation: 4,
-        shadowColor: Colors.black.withOpacity(0.2),
+        shadowColor: AppColors.background.withValues(alpha: 0.2),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -83,8 +82,14 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
         ),
-        labelStyle: GoogleFonts.montserrat(color: AppColors.textSecondary),
-        hintStyle: GoogleFonts.montserrat(color: AppColors.textSecondary),
+        labelStyle: const TextStyle(
+          color: AppColors.textSecondary,
+          fontFamily: 'sans-serif',
+        ),
+        hintStyle: const TextStyle(
+          color: AppColors.textSecondary,
+          fontFamily: 'sans-serif',
+        ),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.cardBackground,

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import '../models/product.dart';
 import '../models/user.dart';
 
 class ApiService {
-  static const String baseUrl =
-      'http://10.0.2.2:8080/api'; // Android emulator localhost
+  /// Use the configurable base URL from [ApiConfig].
+  /// Override at app startup: ApiConfig.init(customUrl: 'https://...');
+  static String get baseUrl => ApiConfig.baseUrl;
 
   // Products API
   Future<List<Product>> getProducts() async {
@@ -137,6 +139,11 @@ class ApiService {
 
   // OAuth2 Google Login (will redirect to web)
   String getGoogleOAuthUrl() {
-    return 'http://localhost:8080/oauth2/authorization/google';
+    // Derive the backend OAuth2 URL from the API base URL
+    // Remove the trailing /api suffix to get the backend root URL
+    final backendUrl = baseUrl.endsWith('/api')
+        ? baseUrl.substring(0, baseUrl.length - 4)
+        : baseUrl;
+    return '$backendUrl/oauth2/authorization/google';
   }
 }

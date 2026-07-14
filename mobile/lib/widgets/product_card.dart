@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/product.dart';
 
+/// Callback when user taps add-to-cart on a product card.
+typedef AddToCartCallback = void Function(Product product);
+
 class ProductCard extends StatelessWidget {
   final Product product;
+  final AddToCartCallback? onAddToCart;
+  final VoidCallback? onTap;
 
-  const ProductCard({super.key, required this.product});
+  const ProductCard({
+    super.key,
+    required this.product,
+    this.onAddToCart,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,90 +25,95 @@ class ProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       elevation: 4,
+      clipBehavior: Clip.antiAlias, // Prevents content overflow
       child: InkWell(
-        onTap: () {
-          // Navigate to product detail
-        },
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        //Column containing the products as components
+        // Column with fixed-height image + flexible details
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //Expanded Widget used for the Image for the product
-            Expanded(
-              flex: 2,
+            // Product image — fixed aspect ratio via AspectRatio
+            AspectRatio(
+              aspectRatio: 1.2,
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
-                  ),
                   image: DecorationImage(
                     image: NetworkImage(product.imageUrl),
                     fit: BoxFit.cover,
                     onError: (exception, stackTrace) {
-                      // Handle image load error
+                      // Show placeholder on error
                     },
                   ),
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
-                    ),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.1),
-                      ],
-                    ),
+                foregroundDecoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.15),
+                    ],
+                  ),
+                ),
+                // Stock badge overlay
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: _StockBadge(stockLevel: product.stockLevel),
                   ),
                 ),
               ),
             ),
-            //Expanded Widget used for the Product Details
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+            // Product details — flexible, no Expanded
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product name — max 2 lines, ellipsis
+                  Text(
+                    product.name,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
                     ),
-                    //Sized box used for separating components
-                    const SizedBox(height: 2),
-                    //Text widget that sets the sizing of the Product Price
-                    Text(
-                      '\$${product.price.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Price
+                  Text(
+                    '\$${product.price.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      height: 1.1,
                     ),
-                    const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Supplier ${product.supplierId}',
+                  ),
+                  const SizedBox(height: 6),
+                  // Bottom row: supplier + add-to-cart
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'ID: ${product.supplierId}',
                           style: Theme.of(context).textTheme.bodySmall,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
+                      ),
+                      InkWell(
+                        onTap: () => onAddToCart?.call(product),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.2),
+                            color: AppColors.primary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -107,13 +122,43 @@ class ProductCard extends StatelessWidget {
                             color: AppColors.primary,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Small badge showing stock availability.
+class _StockBadge extends StatelessWidget {
+  final int? stockLevel;
+
+  const _StockBadge({this.stockLevel});
+
+  @override
+  Widget build(BuildContext context) {
+    if (stockLevel == null) return const SizedBox.shrink();
+    final lowStock = stockLevel! < 5;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: lowStock
+            ? Colors.red.withValues(alpha: 0.85)
+            : Colors.green.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        lowStock ? 'Only $stockLevel' : 'In Stock',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

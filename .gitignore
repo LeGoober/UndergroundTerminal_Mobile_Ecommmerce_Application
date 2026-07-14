@@ -1,0 +1,26 @@
+# Backend build artifacts
+backend/target/
+backend/*.jar
+backend/*.war
+
+# Environment files
+.env
+.env.local
+
+# IDE directories
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml

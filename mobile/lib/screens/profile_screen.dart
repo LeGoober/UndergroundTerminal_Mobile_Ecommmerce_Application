@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
+import '../services/cart_service.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final CartService cartService;
+
+  const ProfileScreen({super.key, required this.cartService});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -110,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (_) => LoginScreen(cartService: widget.cartService)),
           (route) => false,
         );
       }
@@ -175,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    MaterialPageRoute(builder: (_) => LoginScreen(cartService: widget.cartService)),
                   );
                 },
                 child: const Text('Go to Login'),

@@ -109,11 +109,8 @@ class AuthService {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null;
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Here you would send the Google token to your backend
-      // For now, we'll create a mock user
+      // In production, send googleUser.authentication to backend
+      // For now, create a mock user from Google profile data
       final user = User(
         id: 999,
         name: googleUser.displayName ?? 'Google User',

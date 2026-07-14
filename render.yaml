@@ -1,0 +1,113 @@
+# ===============================================================
+# Render Deployment Configuration
+# Underground Terminal B2B Luxury Marketplace API
+# ===============================================================
+# Deploy with: https://render.com/deploy
+# Or connect your GitHub repo and Render will auto-deploy
+
+# ---- Optional: Flutter Web Static Site ----
+# Uncomment this section after deploying the backend to host the frontend on Render.
+# NOTE: You may need to build the Flutter web app locally and push the output to GitHub,
+# or use a Render build pack that supports Flutter.
+#
+# Alternative: Deploy the frontend separately to Vercel or Netlify (free + Flutter-friendly).
+#
+# - type: web
+#   name: underground-terminal-web
+#   env: static
+#   branch: main
+#   buildCommand: cd mobile && flutter build web --dart-define=API_BASE_URL=https://underground-terminal-api.onrender.com/api
+#   staticPublishPath: mobile/build/web
+#   envVars:
+#     - key: API_BASE_URL
+#       value: https://underground-terminal-api.onrender.com/api
+#   headers:
+#     - path: "/*"
+#       name: Cache-Control
+#       value: "public, max-age=3600, must-revalidate"
+#   routes:
+#     - type: rewrite
+#       source: /*
+#       destination: /index.html
+#     - type: rewrite
+#       source: /api/.*
+#       destination: https://underground-terminal-api.onrender.com/api
+
+services:
+  # ---- Production Backend API Service ----
+  - type: web
+    name: underground-terminal-api
+    env: docker
+    region: ohio
+    plan: starter
+    branch: prod
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/products
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: PORT
+        value: "8080"
+      - key: JDBC_DATABASE_URL
+        fromDatabase:
+          name: underground-terminal-db
+          property: jdbcUrl
+      - key: JWT_SECRET
+        generateValue: true
+        length: 64
+      - key: JWT_EXPIRATION
+        value: "86400000"
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        # ⚠️ Update this after your web app is deployed (e.g., https://underground-terminal.onrender.com)
+        # For development/testing, keep as "*"
+        value: "*"
+
+  # ---- Staging Backend API Service ----
+  - type: web
+    name: underground-terminal-api-staging
+    env: docker
+    region: ohio
+    plan: starter
+    branch: staging
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/products
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: PORT
+        value: "8080"
+      - key: JDBC_DATABASE_URL
+        fromDatabase:
+          name: underground-terminal-db-staging
+          property: jdbcUrl
+      - key: JWT_SECRET
+        generateValue: true
+        length: 64
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        value: "*"
+
+  # ---- Production Database (PostgreSQL) ----
+  - type: postgresql
+    name: underground-terminal-db
+    plan: starter
+    region: ohio
+    branch: prod
+    databaseName: underground_terminal_prod
+    ipAllowList: [] # Restrict to Render internal network
+
+  # ---- Staging Database (PostgreSQL) ----
+  - type: postgresql
+    name: underground-terminal-db-staging
+    plan: starter
+    region: ohio
+    branch: staging
+    databaseName: underground_terminal_staging
+    ipAllowList: []

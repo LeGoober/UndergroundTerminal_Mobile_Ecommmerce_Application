@@ -37,7 +37,7 @@ public class ProductService implements IProductService{
     }
 
     public List<Product> findBySupplierId(Long supplierId){
-        return productRepository.findBySupplierId(supplierId);
+        return productRepository.findBySupplier_Id(supplierId);
     }
 
     public List<Product> findByNameContainingIgnoreCase(String name){

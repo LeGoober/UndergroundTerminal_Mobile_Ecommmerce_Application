@@ -6,9 +6,6 @@ import com.undergroundterminal.api.services.UserService;
 import com.undergroundterminal.api.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -35,6 +32,24 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
+            // Validate input
+            if (request.getName() == null || request.getName().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Name is required"));
+            }
+            if (request.getEmail() == null || !request.getEmail().contains("@")) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Valid email is required"));
+            }
+            if (request.getPassword() == null || request.getPassword().length() < 6) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Password must be at least 6 characters"));
+            }
+            if (request.getRole() == null || request.getRole().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Role is required"));
+            }
+
             // Check if user already exists
             Optional<User> existingUser = userService.findByEmail(request.getEmail());
             if (existingUser.isPresent()) {
@@ -42,12 +57,21 @@ public class AuthController {
                     .body(Map.of("error", "User with this email already exists"));
             }
 
+            // Validate role
+            String roleUpper = request.getRole().toUpperCase();
+            try {
+                UserRole.valueOf(roleUpper);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Invalid role. Must be SUPPLIER, BUYER, or DESIGNER"));
+            }
+
             // Create new user
             User user = new User();
             user.setName(request.getName());
             user.setEmail(request.getEmail());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setRole(UserRole.valueOf(request.getRole().toUpperCase()));
+            user.setRole(UserRole.valueOf(roleUpper));
             user.setBio(request.getBio() != null ? request.getBio() : "");
 
             User savedUser = userService.create(user);
@@ -73,15 +97,20 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
+            if (request.getEmail() == null || request.getPassword() == null) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email and password are required"));
+            }
+
             Optional<User> userOpt = userService.findByEmail(request.getEmail());
-            
+
             if (userOpt.isEmpty()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Invalid email or password"));
             }
 
             User user = userOpt.get();
-            
+
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Invalid email or password"));
@@ -164,7 +193,7 @@ public class AuthController {
 
             String token = authHeader.substring(7);
             String email = jwtUtil.extractEmail(token);
-            
+
             if (jwtUtil.isTokenValid(token, email)) {
                 Optional<User> userOpt = userService.findByEmail(email);
                 if (userOpt.isPresent()) {

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/cart_service.dart';
 import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final CartService cartService;
+
+  const SplashScreen({super.key, required this.cartService});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -34,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(builder: (context) => LoginScreen(cartService: widget.cartService)),
       );
     }
   }
@@ -63,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),
