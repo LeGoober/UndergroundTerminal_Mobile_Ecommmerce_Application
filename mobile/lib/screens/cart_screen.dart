@@ -1,11 +1,62 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/api_service.dart';
 import '../services/cart_service.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   final CartService cartService;
 
   const CartScreen({super.key, required this.cartService});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  final ApiService _apiService = ApiService();
+  bool _placingOrder = false;
+
+  CartService get cartService => widget.cartService;
+
+  Future<void> _checkout() async {
+    if (_placingOrder) return;
+    setState(() => _placingOrder = true);
+    try {
+      final items = cartService.items
+          .map((item) => {
+                'productId': item.product.id,
+                'quantity': item.quantity,
+              })
+          .toList();
+      final order = await _apiService.placeOrder(items);
+      cartService.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Order #${order.id} placed — \$${order.total.toStringAsFixed(2)}. '
+              'Track it under Terminal → Logistics.',
+            ),
+            backgroundColor: AppColors.primary,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _placingOrder = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,17 +136,8 @@ class CartScreen extends StatelessWidget {
         _CheckoutBar(
           subtotal: cartService.subtotal,
           itemCount: cartService.totalQuantity,
-          onCheckout: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Checkout simulation — order total: \$${cartService.subtotal.toStringAsFixed(2)}',
-                ),
-                backgroundColor: AppColors.primary,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
+          busy: _placingOrder,
+          onCheckout: _checkout,
         ),
       ],
     );
@@ -234,11 +276,13 @@ class _QtyButton extends StatelessWidget {
 class _CheckoutBar extends StatelessWidget {
   final double subtotal;
   final int itemCount;
+  final bool busy;
   final VoidCallback onCheckout;
 
   const _CheckoutBar({
     required this.subtotal,
     required this.itemCount,
+    required this.busy,
     required this.onCheckout,
   });
 
@@ -276,8 +320,14 @@ class _CheckoutBar extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: onCheckout,
-              child: const Text('Checkout'),
+              onPressed: busy ? null : onCheckout,
+              child: busy
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Place order'),
             ),
           ],
         ),
