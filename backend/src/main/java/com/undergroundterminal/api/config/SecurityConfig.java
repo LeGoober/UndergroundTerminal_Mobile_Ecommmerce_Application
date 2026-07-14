@@ -42,6 +42,8 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/login/oauth2/code/**").permitAll()
                 .requestMatchers("/oauth2/**").permitAll()
+                // WebSocket handshake — authenticated inside ChatWebSocketHandler via JWT query param
+                .requestMatchers("/ws/**").permitAll()
                 // Protected endpoints
                 .anyRequest().authenticated()
             )
