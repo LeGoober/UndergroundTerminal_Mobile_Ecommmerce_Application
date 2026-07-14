@@ -33,7 +33,7 @@ public class OrderService implements IOrderService {
 
     @Override
     public Order read(Long id) {
-        return orderRepository.findById(id).orElse(null);
+        return orderRepository.findByIdWithItems(id).orElse(null);
     }
 
     @Override
@@ -99,11 +99,11 @@ public class OrderService implements IOrderService {
 
     @Override
     public List<Order> findByBuyerId(Long buyerId) {
-        return orderRepository.findByBuyer_IdOrderByCreatedAtDesc(buyerId);
+        return orderRepository.findByBuyerIdWithItems(buyerId);
     }
 
     @Override
     public List<Order> findBySupplierId(Long supplierId) {
-        return orderRepository.findBySupplierId(supplierId);
+        return orderRepository.findBySupplierIdWithItems(supplierId);
     }
 }

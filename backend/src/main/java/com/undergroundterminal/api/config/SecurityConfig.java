@@ -44,6 +44,9 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/**").permitAll()
                 // WebSocket handshake — authenticated inside ChatWebSocketHandler via JWT query param
                 .requestMatchers("/ws/**").permitAll()
+                // Boot's error dispatch re-enters the chain without the JWT filter;
+                // blocking it masks real errors (e.g. 500s) as 401s
+                .requestMatchers("/error").permitAll()
                 // Protected endpoints
                 .anyRequest().authenticated()
             )

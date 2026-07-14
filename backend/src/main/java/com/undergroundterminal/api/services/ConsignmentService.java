@@ -25,7 +25,7 @@ public class ConsignmentService implements IConsignmentService {
 
     @Override
     public Consignment read(Long id) {
-        return consignmentRepository.findById(id).orElse(null);
+        return consignmentRepository.findByIdWithOrder(id).orElse(null);
     }
 
     @Override
@@ -66,15 +66,15 @@ public class ConsignmentService implements IConsignmentService {
     @Override
     public List<Consignment> listForUser(User user) {
         if (user.getRole() == User.UserRole.SUPPLIER) {
-            return consignmentRepository.findBySupplierId(user.getId());
+            return consignmentRepository.findBySupplierIdWithOrder(user.getId());
         }
-        return consignmentRepository.findByOrder_Buyer_IdOrderByCreatedAtDesc(user.getId());
+        return consignmentRepository.findByBuyerIdWithOrder(user.getId());
     }
 
     @Override
     @Transactional
     public Consignment advanceStatus(Long consignmentId, Consignment.ConsignmentStatus status, String note) {
-        Consignment consignment = consignmentRepository.findById(consignmentId)
+        Consignment consignment = consignmentRepository.findByIdWithOrder(consignmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Consignment not found: " + consignmentId));
 
         consignment.setStatus(status);
