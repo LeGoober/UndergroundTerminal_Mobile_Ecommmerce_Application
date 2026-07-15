@@ -11,7 +11,7 @@
     
     <groupId>com.undergroundterminal</groupId>
     <artifactId>underground-terminal-api</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.2.0</version>
     <name>underground-terminal-api</name>
     <description>Underground Terminal B2B Luxury Marketplace API</description>
     
@@ -45,6 +45,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
+        <!-- WebSocket (live messaging) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
         
         <!-- JWT Support -->

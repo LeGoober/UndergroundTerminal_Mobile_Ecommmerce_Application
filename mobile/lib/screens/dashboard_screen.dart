@@ -6,6 +6,7 @@ import '../services/cart_service.dart';
 import '../widgets/product_card.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
+import 'terminal_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final CartService cartService;
@@ -98,7 +99,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         behavior: SnackBarBehavior.floating,
         action: SnackBarAction(
           label: 'View Cart',
-          onPressed: () => setState(() => _selectedIndex = 2),
+          onPressed: () => setState(() => _selectedIndex = 3),
         ),
       ),
     );
@@ -113,6 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _buildHomePage(),
           _buildSearchPage(),
+          const TerminalScreen(),
           CartScreen(cartService: widget.cartService),
           ProfileScreen(cartService: widget.cartService),
         ],
@@ -137,6 +139,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icon(Icons.search_outlined),
                 activeIcon: Icon(Icons.search),
                 label: 'Search',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.hub_outlined),
+                activeIcon: Icon(Icons.hub),
+                label: 'Terminal',
               ),
               BottomNavigationBarItem(
                 icon: _buildCartBadge(Icons.shopping_cart_outlined),
